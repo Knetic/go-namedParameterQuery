@@ -1,6 +1,6 @@
 /*
 	Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
-	
+
 	Named parameters are not supported by all SQL query engines, and their standards are scattered.
 	But positional parameters have wide adoption across all databases.
 
@@ -128,16 +128,15 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 	var character rune
 	var parameterName string
 	var width int
-	var revisedIndex int
+	var positionIndex int
 
 	this.originalQuery = queryText
-	revisedIndex = 0
+	positionIndex = 0
 
 	for i := 0; i < len(queryText); {
 
 		character, width = utf8.DecodeRuneInString(queryText[i:])
 		i += width
-		revisedIndex += width
 
 		// if it's a colon, do not write to builder, but grab name
 		if(character == ':' || character == '@') {
@@ -157,7 +156,8 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 			// add to positions
 			parameterName = parameterBuilder.String()
 			position = this.positions[parameterName]
-			this.positions[parameterName] = append(position, revisedIndex)
+			this.positions[parameterName] = append(position, positionIndex)
+			positionIndex++
 
 			revisedBuilder.WriteString("?")
 			parameterBuilder.Reset()
@@ -173,7 +173,6 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 
 				character, width = utf8.DecodeRuneInString(queryText[i:])
 				i += width
-				revisedIndex += width
 				revisedBuilder.WriteString(string(character))
 
 				if(character == '\'') {
@@ -210,7 +209,7 @@ func (this *NamedParameterQuery) GetParsedParameters() ([]interface{}) {
 */
 func (this *NamedParameterQuery) SetValue(parameterName string, parameterValue interface{}) {
 
-	for position := range this.positions[parameterName] {
+	for _, position := range this.positions[parameterName] {
 		this.parameters[position] = parameterValue
 	}
 }
