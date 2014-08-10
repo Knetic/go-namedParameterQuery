@@ -1,4 +1,6 @@
 /*
+	Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
+	
 	Named parameters are not supported by all SQL query engines, and their standards are scattered.
 	But positional parameters have wide adoption across all databases.
 

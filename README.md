@@ -1,6 +1,8 @@
 NamedParameterQuery
 --
 
+Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
+
 SQL query parameters in go are positional. This means that
 when writing a query, you'll need to do it like this:
 
