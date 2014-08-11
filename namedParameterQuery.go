@@ -98,8 +98,8 @@ type NamedParameterQuery struct {
 
 /*
 	NewNamedParameterQuery creates a new named parameter query using the given [queryText] as a SQL query which
-	contains named parameters. Named parameters are identified by starting with either a ":" or "@"
-	e.g., "@name" refers to the parameter "name", and ":foo" refers to the parameter "foo".
+	contains named parameters. Named parameters are identified by starting with a ":"
+	e.g., ":name" refers to the parameter "name", and ":foo" refers to the parameter "foo".
 
 	Except for their names, named parameters follow all the same rules as positional parameters;
 	they cannot be inside quoted strings, and cannot inject statements into a query. They can only
@@ -139,7 +139,7 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 		i += width
 
 		// if it's a colon, do not write to builder, but grab name
-		if(character == ':' || character == '@') {
+		if(character == ':') {
 
 			for ;; {
 
@@ -183,7 +183,7 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 	}
 
 	this.revisedQuery = revisedBuilder.String()
-	this.parameters = make([]interface{}, len(this.positions))
+	this.parameters = make([]interface{}, positionIndex)
 }
 
 /*
@@ -209,7 +209,7 @@ func (this *NamedParameterQuery) GetParsedParameters() ([]interface{}) {
 */
 func (this *NamedParameterQuery) SetValue(parameterName string, parameterValue interface{}) {
 
-	for _, position := range this.positions[parameterName] {
+	for index, position := range this.positions[parameterName] {
 		this.parameters[position] = parameterValue
 	}
 }
