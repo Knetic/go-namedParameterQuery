@@ -209,7 +209,7 @@ func (this *NamedParameterQuery) GetParsedParameters() ([]interface{}) {
 */
 func (this *NamedParameterQuery) SetValue(parameterName string, parameterValue interface{}) {
 
-	for index, position := range this.positions[parameterName] {
+	for _, position := range this.positions[parameterName] {
 		this.parameters[position] = parameterValue
 	}
 }
@@ -248,8 +248,9 @@ func (this *NamedParameterQuery) SetValuesFromStruct(parameters interface{}) (er
 	var parameterType reflect.Type
 	var parameterField reflect.StructField
 	var queryTag string
+	var visibilityCharacter rune
 
-	fieldValues = reflect.ValueOf(parameters).Elem()
+	fieldValues = reflect.ValueOf(parameters)
 
 	if(fieldValues.Kind() != reflect.Struct) {
 		return errors.New("Unable to add query values from parameter: parameter is not a struct")
@@ -260,17 +261,19 @@ func (this *NamedParameterQuery) SetValuesFromStruct(parameters interface{}) (er
 	for i := 0; i < fieldValues.NumField(); i++ {
 
 		fieldValue = fieldValues.Field(i)
+		parameterField = parameterType.Field(i)
 
 		// public field?
-		if(fieldValue.CanSet()) {
+		visibilityCharacter, _ = utf8.DecodeRuneInString(parameterField.Name[0:])
+
+		if(fieldValue.CanSet() || unicode.IsUpper(visibilityCharacter)) {
 
 			// check to see if this has a tag indicating a different query name
-			parameterField = parameterType.Field(i)
 			queryTag = parameterField.Tag.Get("sqlParameterName")
 
 			// otherwise just add the struct's name.
 			if(len(queryTag) <= 0) {
-				queryTag = parameterType.Field(i).Name
+				queryTag = parameterField.Name
 			}
 
 			this.SetValue(queryTag, fieldValue.Interface())
