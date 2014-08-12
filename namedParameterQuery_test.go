@@ -7,13 +7,32 @@ import (
 /*
 	Represents a single test of query parsing.
 	Given an [Input] query, if the actual result of parsing
-	does not match the [Expected] string, the test fails with the given [FailureMessage]
+	does not match the [Expected] string, the test fails
 */
 type QueryParsingTest struct {
 	Name string
 	Input string
 	Expected string
 	ExpectedParameters int
+}
+
+/*
+	Represents a single test of parameter parsing.
+	Given the [Query] and a set of [Parameters], if the actual parameter output
+	from GetParsedParameters() matches the given [ExpectedParameters].
+	These tests specifically check type of output parameters, too.
+*/
+type ParameterParsingTest struct {
+
+	Name string
+	Query string
+	Parameters []TestQueryParameter
+	ExpectedParameters []interface{}
+}
+
+type TestQueryParameter struct {
+	Name string
+	Value interface{}
 }
 
 func TestQueryParsing(test *testing.T) {
@@ -86,6 +105,123 @@ func TestQueryParsing(test *testing.T) {
 		if(len(query.GetParsedParameters()) != parsingTest.ExpectedParameters) {
 			test.Log("Test '", parsingTest.Name, "': Expected parameters did not match actual parsed parameter count")
 			test.Fail()
+		}
+	}
+}
+
+/*
+	Tests to ensure that setting parameter values turns out correct when using GetParsedParameters().
+	These tests ensure correct positioning and type.
+*/
+func TestParameterReplacement(test *testing.T) {
+
+	var query *NamedParameterQuery
+
+	queryVariableTests := []ParameterParsingTest {
+		ParameterParsingTest {
+
+			Name: "SingleStringParameter",
+			Query: "SELECT * FROM table WHERE col1 = :foo",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "foo",
+					Value: "bar",
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"bar",
+			},
+		},
+		ParameterParsingTest {
+
+			Name: "TwoStringParameter",
+			Query: "SELECT * FROM table WHERE col1 = :foo AND col2 = :foo2",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "foo",
+					Value: "bar",
+				},
+				TestQueryParameter {
+					Name: "foo2",
+					Value: "bart",
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"bar", "bart",
+			},
+		},
+		ParameterParsingTest {
+
+			Name: "TwiceOccurringParameter",
+			Query: "SELECT * FROM table WHERE col1 = :foo AND col2 = :foo",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "foo",
+					Value: "bar",
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"bar", "bar",
+			},
+		},
+		ParameterParsingTest {
+
+			Name: "ParameterTyping",
+			Query: "SELECT * FROM table WHERE col1 = :str AND col2 = :int AND col3 = :pi",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "str",
+					Value: "foo",
+				},
+				TestQueryParameter {
+					Name: "int",
+					Value: 1,
+				},
+				TestQueryParameter {
+					Name: "pi",
+					Value: 3.14,
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"foo", 1, 3.14,
+			},
+		},
+		ParameterParsingTest {
+
+			Name: "ParameterOrdering",
+			Query: "SELECT * FROM table WHERE col1 = :foo AND col2 = :bar AND col3 = :foo AND col4 = :foo AND col5 = :bar",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "foo",
+					Value: "something",
+				},
+				TestQueryParameter {
+					Name: "bar",
+					Value: "else",
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"something", "else", "something", "something", "else",
+			},
+		},
+	}
+
+	// run variable tests.
+	for _, variableTest := range queryVariableTests {
+
+		// parse query and set values.
+		query = NewNamedParameterQuery(variableTest.Query)
+		for _, queryVariable := range variableTest.Parameters {
+			query.SetValue(queryVariable.Name, queryVariable.Value)
+		}
+
+		// Test outputs
+		for index, queryVariable := range query.GetParsedParameters() {
+
+			if(queryVariable != variableTest.ExpectedParameters[index]) {
+				test.Log("Test '", variableTest.Name, "' did not produce the expected parameter output. Actual: '", queryVariable, "', Expected: '", variableTest.ExpectedParameters[index], "'")
+				test.Fail()
+			}
 		}
 	}
 }
