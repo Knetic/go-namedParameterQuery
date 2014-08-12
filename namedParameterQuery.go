@@ -109,6 +109,9 @@ func NewNamedParameterQuery(queryText string) (*NamedParameterQuery) {
 
 	var ret *NamedParameterQuery
 
+	// TODO: I don't like using a map for such a small amount of elements.
+	// If this becomes a bottleneck for anyone, the first thing to do would
+	// be to make a slice and search routine for parameter positions.
 	ret = new(NamedParameterQuery)
 	ret.positions = make(map[string][]int, 8)
 	ret.setQuery(queryText)
@@ -161,6 +164,10 @@ func (this *NamedParameterQuery) setQuery(queryText string) {
 
 			revisedBuilder.WriteString("?")
 			parameterBuilder.Reset()
+
+			if(width <= 0) {
+				break
+			}
 		}
 
 		// otherwise write.
