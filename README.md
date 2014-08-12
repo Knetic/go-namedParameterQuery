@@ -48,7 +48,7 @@ How do I use this?
 
 Probably best to check out the API docs
 
-http://godoc.org/github.com/knetic/go-namedParameterQuery
+http://godoc.org/github.com/Knetic/go-namedParameterQuery
 
 But here are some quick examples of the main use cases.
 
