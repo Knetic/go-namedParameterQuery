@@ -136,6 +136,9 @@ func TestParameterReplacement(test *testing.T) {
 	var query *NamedParameterQuery
 	var parameterMap map[string]interface{}
 
+	// note that if you're adding or editing these tests,
+	// you'll also want to edit the associated struct for this test below,
+	// in the next test func.
 	queryVariableTests := []ParameterParsingTest {
 		ParameterParsingTest {
 
@@ -274,6 +277,83 @@ func TestParameterReplacement(test *testing.T) {
 				test.Log("Test '", variableTest.Name, "' did not produce the expected parameter output when using parameter map. Actual: '", queryVariable, "', Expected: '", variableTest.ExpectedParameters[index], "'")
 				test.Fail()
 			}
+		}
+	}
+}
+
+// Test for struct parameters.
+// TODO: Figure out a way to tie this together with tests for maps/singles.
+// Right now, each test needs to be hand-defined with its own struct and test method.
+type SingleParameterTest struct {
+	Foo string
+	Bar string
+	Baz int
+	unexported string
+	notExported int
+}
+
+func TestStructParameters(test *testing.T) {
+
+	var query *NamedParameterQuery
+	var singleParam SingleParameterTest
+
+	singleParam.Foo = "foo"
+	singleParam.Bar = "bar"
+	singleParam.Baz = 15
+	singleParam.unexported = "nothing"
+	singleParam.notExported = -1
+
+	//
+	query = NewNamedParameterQuery("SELECT * FROM table WHERE col1 = :Foo AND col2 = :Bar AND col3 = :Baz")
+	query.SetValuesFromStruct(singleParam)
+
+	verifyStructParameters("MultipleStructReplacement", test, query, []interface{} {
+		"foo",
+		"bar",
+		15,
+	})
+
+	//
+	query = NewNamedParameterQuery("SELECT * FROM table WHERE col1 = :Foo AND col2 = :Bar AND col3 = :Foo AND col4 = :Foo AND col5 = :Baz")
+	query.SetValuesFromStruct(singleParam)
+
+	verifyStructParameters("RecurringStructParameterReplacement", test, query, []interface{} {
+		"foo",
+		"bar",
+		"foo",
+		"foo",
+		15,
+	})
+
+	//
+	query = NewNamedParameterQuery("SELECT * FROM table WHERE col1 = :unexported AND col2 = :notExported AND col3 = :Foo")
+	query.SetValuesFromStruct(singleParam)
+
+	verifyStructParameters("UnexportedStructReplacement", test, query, []interface{} {
+		nil,
+		nil,
+		"foo",
+	})
+}
+
+func verifyStructParameters(testName string, test *testing.T, query *NamedParameterQuery, expectedParameters []interface{}) {
+
+	var actualParameters []interface{}
+
+	actualParameters = query.GetParsedParameters()
+
+	actualParameterLength := len(actualParameters)
+	expectedParameterLength := len(expectedParameters)
+
+	if(actualParameterLength != expectedParameterLength) {
+		test.Log("Test ", testName, ": Actual parameters (", actualParameterLength, ") returned from struct query did not match expected parameters (", expectedParameterLength, ")")
+		test.Fail()
+	}
+
+	for index, parameter := range actualParameters {
+		if(parameter != expectedParameters[index]) {
+			test.Log("Test ", testName, ": Actual parameter at position ", index, " (", parameter, ") did not match expected parameter (", expectedParameters[index], ")")
+			test.Fail()
 		}
 	}
 }
