@@ -134,6 +134,7 @@ func TestQueryParsing(test *testing.T) {
 func TestParameterReplacement(test *testing.T) {
 
 	var query *NamedParameterQuery
+	var parameterMap map[string]interface{}
 
 	queryVariableTests := []ParameterParsingTest {
 		ParameterParsingTest {
@@ -246,9 +247,12 @@ func TestParameterReplacement(test *testing.T) {
 	for _, variableTest := range queryVariableTests {
 
 		// parse query and set values.
+		parameterMap = make(map[string]interface{}, 8)
 		query = NewNamedParameterQuery(variableTest.Query)
+
 		for _, queryVariable := range variableTest.Parameters {
 			query.SetValue(queryVariable.Name, queryVariable.Value)
+			parameterMap[queryVariable.Name] = queryVariable.Value
 		}
 
 		// Test outputs
@@ -256,6 +260,18 @@ func TestParameterReplacement(test *testing.T) {
 
 			if(queryVariable != variableTest.ExpectedParameters[index]) {
 				test.Log("Test '", variableTest.Name, "' did not produce the expected parameter output. Actual: '", queryVariable, "', Expected: '", variableTest.ExpectedParameters[index], "'")
+				test.Fail()
+			}
+		}
+
+		query = NewNamedParameterQuery(variableTest.Query)
+		query.SetValuesFromMap(parameterMap)
+
+		// test map parameter outputs.
+		for index, queryVariable := range query.GetParsedParameters() {
+
+			if(queryVariable != variableTest.ExpectedParameters[index]) {
+				test.Log("Test '", variableTest.Name, "' did not produce the expected parameter output when using parameter map. Actual: '", queryVariable, "', Expected: '", variableTest.ExpectedParameters[index], "'")
 				test.Fail()
 			}
 		}
