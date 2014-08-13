@@ -87,6 +87,24 @@ func TestQueryParsing(test *testing.T) {
 			ExpectedParameters: 2,
 			Name: "ParametersInSubclause",
 		},
+		QueryParsingTest {
+			Input: "SELECT * FROM table WHERE col1 = :1234567890 AND col2 = :0987654321",
+			Expected: "SELECT * FROM table WHERE col1 = ? AND col2 = ?",
+			ExpectedParameters: 2,
+			Name: "NumericParameters",
+		},
+		QueryParsingTest {
+			Input: "SELECT * FROM table WHERE col1 = :ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			Expected: "SELECT * FROM table WHERE col1 = ?",
+			ExpectedParameters: 1,
+			Name: "CapsParameters",
+		},
+		QueryParsingTest {
+			Input: "SELECT * FROM table WHERE col1 = :abc123ABC098",
+			Expected: "SELECT * FROM table WHERE col1 = ?",
+			ExpectedParameters: 1,
+			Name: "AltcapsParameters",
+		},
 	}
 
 	// Run each test.
@@ -202,6 +220,24 @@ func TestParameterReplacement(test *testing.T) {
 			},
 			ExpectedParameters: []interface{} {
 				"something", "else", "something", "something", "else",
+			},
+		},
+		ParameterParsingTest {
+
+			Name: "ParameterCaseSensitivity",
+			Query: "SELECT * FROM table WHERE col1 = :foo AND col2 = :FOO",
+			Parameters: []TestQueryParameter {
+				TestQueryParameter {
+					Name: "foo",
+					Value: "baz",
+				},
+				TestQueryParameter {
+					Name: "FOO",
+					Value: "quux",
+				},
+			},
+			ExpectedParameters: []interface{} {
+				"baz", "quux",
 			},
 		},
 	}
