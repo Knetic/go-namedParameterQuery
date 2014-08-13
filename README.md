@@ -1,6 +1,9 @@
 NamedParameterQuery
 --
 
+[![Build Status](https://travis-ci.org/Knetic/go-namedParameterQuery.svg?branch=master)](https://travis-ci.org/Knetic/go-namedParameterQuery)
+
+
 Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
 
 SQL query parameters in go are positional. This means that
@@ -119,3 +122,8 @@ When defining your struct, you don't *need* to add the "sqlParameterName" tags.
 But if your query uses lowercase variable names (as mine did), your struct
 will need to have exportable field names (as above) you can translate between the two
 with a tag.
+
+License
+--
+
+This implementation of Go named parameter queries is licensed under the MIT general use license. You're free to integrate, fork, and play with this code as you feel fit without consulting the author, as long as you provide proper credit to the author in your works. If you have questions, issues, or patches, I'm completely open to pull requests, issues opened on github, or emails from out of the blue.
