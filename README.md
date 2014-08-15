@@ -2,6 +2,7 @@ NamedParameterQuery
 ====
 
 [![Build Status](https://travis-ci.org/Knetic/go-namedParameterQuery.svg?branch=master)](https://travis-ci.org/Knetic/go-namedParameterQuery)
+[![Godoc](https://godoc.org/github.com/Knetic/go-namedParameterQuery?status.png)](https://godoc.org/github.com/Knetic/go-namedParameterQuery)
 
 
 Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
