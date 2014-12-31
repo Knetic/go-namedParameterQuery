@@ -1,7 +1,8 @@
 NamedParameterQuery
---
+====
 
 [![Build Status](https://travis-ci.org/Knetic/go-namedParameterQuery.svg?branch=master)](https://travis-ci.org/Knetic/go-namedParameterQuery)
+[![Godoc](https://godoc.org/github.com/Knetic/go-namedParameterQuery?status.png)](https://godoc.org/github.com/Knetic/go-namedParameterQuery)
 
 
 Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
@@ -12,15 +13,16 @@ when writing a query, you'll need to do it like this:
 	SELECT * FROM table
 	WHERE col1 = ?
 	AND col2 IN(?, ?, ?)
+	AND col3 = ?
 
 Where "?" is a parameter that you want to replace with an actual value at runtime.
 Your code would need to look like this:
 
-	sql.QueryRow(queryText, "foo", "bar", "baz", "woot")
+	sql.QueryRow(queryText, "foo", "bar", "baz", "woot", "bar")
 
 As you can probably guess, this can lead to very unwieldy code in large queries.
 You wind up needing to keep track not only of how many parameters you have, but in what
-order the query expects them. Refactoring your code even once can lead to disastrous
+order the query expects them. Sometimes you want to reference the same variable in more than one place in your query, which requires you to specify it more than once in your code! Refactoring your queries even once can lead to disastrous
 and annoying results.
 
 The answer to this is to use named parameters, which would look like this:
@@ -28,6 +30,9 @@ The answer to this is to use named parameters, which would look like this:
 	SELECT * FROM table
 	WHERE col1 = :userName
 	AND col2 IN(:firstName, :lastName, :middleName)
+	AND col3 = :firstname
+
+You would then add parameters to your query by name. This means you won't need to worry about what order your parameters are specified, nor how many times they appear.
 
 But golang doesn't support named parameters! That's what this library is for.
 
@@ -45,6 +50,16 @@ on their own, but this polyfill works fine anyway.
 It's possible that someone else already implemented this, but I sure couldn't find
 a pre-existing solution when I needed it.
 
+Isn't there a better way?
+--
+
+In short, not across all databases, and not without complicating your query.
+
+There are other ways to achieve the same effect on some databases. You can [register stored procedures which take positional parameters](http://www.mysqltutorial.org/stored-procedures-parameters.aspx), then call that procedure instead of writing a query. However that's a fairly specific use case - you don't always want to store your query permanently on the server; that means you have to worry about query versioning on the server, and complicates updates to queries during deployment, and precludes you from easily deploying new queries without damaging processes relying on the old ones. For most cases, sending the entire query every time you want to use it is the better option.
+
+Or, if your database supports it, you could [define user-local variables in your query](http://stackoverflow.com/questions/5154246/mysql-connector-j-allow-user-variables). Usually this requires a change to your DB, connectionstring, and queries. The syntax also varies across databases in unpredictable ways - meaning you're going to write less portable queries.
+
+Personally I don't find those options attractive. To me, a query ought to support named parameters without edits to your database. That's why this library exists.
 
 How do I use this?
 --
