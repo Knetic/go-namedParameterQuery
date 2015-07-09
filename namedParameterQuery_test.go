@@ -125,6 +125,8 @@ func TestQueryParsing(test *testing.T) {
 			test.Fail()
 		}
 	}
+
+	test.Logf("Run %d query parsing tests", len(queryParsingTests))
 }
 
 /*
@@ -279,6 +281,8 @@ func TestParameterReplacement(test *testing.T) {
 			}
 		}
 	}
+
+	test.Logf("Run %d query replacement tests", len(queryVariableTests))
 }
 
 // Test for struct parameters.
@@ -356,4 +360,6 @@ func verifyStructParameters(testName string, test *testing.T, query *NamedParame
 			test.Fail()
 		}
 	}
+
+	test.Logf("Run %d struct reflection parameter tests", actualParameterLength)
 }
