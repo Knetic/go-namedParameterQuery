@@ -1,10 +1,6 @@
 NamedParameterQuery
 ====
 
-[![Build Status](https://travis-ci.org/Knetic/go-namedParameterQuery.svg?branch=master)](https://travis-ci.org/Knetic/go-namedParameterQuery)
-[![Godoc](https://godoc.org/github.com/Knetic/go-namedParameterQuery?status.png)](https://godoc.org/github.com/Knetic/go-namedParameterQuery)
-
-
 Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
 
 SQL query parameters in go are positional. This means that
@@ -66,8 +62,6 @@ How do I use this?
 
 Probably best to check out the API docs
 
-http://godoc.org/github.com/Knetic/go-namedParameterQuery
-
 But here are some quick examples of the main use cases.
 
 	query := NewNamedParameterQuery("
@@ -118,7 +112,7 @@ No problem.
 		Foo string		`sqlParameterName:"foo"`
 		FirstName string 	`sqlParameterName:"firstName"`
 		MiddleName string `sqlParameterName:"middleName"`
-		LastName string 	`sqlParameterName:"lirstName"`
+		LastName string 	`sqlParameterName:"lastName"`
 	}
 
 	query := NewNamedParameterQuery("

@@ -2,10 +2,12 @@
 *.o
 *.a
 *.so
+cover.out
 
 # Folders
 _obj
 _test
+.idea
 
 # Architecture specific extensions/prefixes
 *.[568vq]
