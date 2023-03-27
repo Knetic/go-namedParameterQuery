@@ -33,14 +33,7 @@ func Using(dbObject WrappableDBObject) *DBObjectWrapper {
 // which are processed as key, value pairs, and in that case, the keys are expected to be strings.
 // If the number of arguments is not even, or a key value is not a string, an error is returned.
 func (w *DBObjectWrapper) Query(query string, args ...any) (*sql.Rows, error) {
-	parsedQuery, params, err := parse(query, args)
-	if err != nil {
-		return nil, err
-	}
-	if len(params) == 0 {
-		return w.wrappedDBObject.Query(parsedQuery)
-	}
-	return w.wrappedDBObject.Query(parsedQuery, params...)
+	return execute[*sql.Rows](w.wrappedDBObject.Query, query, args...)
 }
 
 // QueryContext performs a parameterized query using the expanded args to feed the parameter values.
@@ -116,4 +109,21 @@ func (w *DBObjectWrapper) ExecContext(ctx context.Context, query string, args ..
 		return w.wrappedDBObject.ExecContext(ctx, parsedQuery)
 	}
 	return w.wrappedDBObject.ExecContext(ctx, parsedQuery, params...)
+}
+
+type results interface { *sql.Rows | *sql.Row }
+
+type twoValuesFunction[T results] func(string, ...any) (T, error)
+
+type oneValueFunction[T results] func(string, ...any) (T, error)
+
+func execute[T results](f twoValuesFunction[T], query string, args ...any) (T, error) {
+	parsedQuery, params, err := parse(query, args)
+	if err != nil {
+		return nil, err
+	}
+	if len(params) == 0 {
+		return f(parsedQuery)
+	}
+	return f(parsedQuery, params...)
 }
