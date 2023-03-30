@@ -337,6 +337,11 @@ func TestStructParameters(test *testing.T) {
 		nil,
 		"foo",
 	})
+
+	query = NewQuery("SELECT * FROM table WHERE col1 = :unexported AND col2 = :notExported AND col3 = :Foo")
+	if query.SetValuesFromStruct("bar") == nil {
+		test.Fail()
+	}
 }
 
 func verifyStructParameters(testName string, test *testing.T, query *Query, expectedParameters []interface{}) {
