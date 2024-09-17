@@ -1,42 +1,44 @@
 package namedParameterQuery
 
 import (
-  "testing"
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
+	"testing"
+
+	"github.com/daniel-munoz/go-namedParameterQuery/namedparameter"
 )
 
 func BenchmarkSimpleParsing(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux"
-  for i := 0; i < bench.N; i++ {
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux"
+	for i := 0; i < bench.N; i++ {
 
-    NewNamedParameterQuery(query)
-  }
+		namedparameter.NewQuery(query)
+	}
 }
 
 func BenchmarkMultiOccurrenceParsing(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
-            "AND [something] = :quux " +
-            "OR [otherStuff] NOT :quux"
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
+		"AND [something] = :quux " +
+		"OR [otherStuff] NOT :quux"
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    NewNamedParameterQuery(query)
-  }
+		namedparameter.NewQuery(query)
+	}
 }
 
 func BenchmarkMultiParameterParsing(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
-            "AND [something] = :quux2 " +
-            "OR [otherStuff] NOT :quux3"
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
+		"AND [something] = :quux2 " +
+		"OR [otherStuff] NOT :quux3"
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    NewNamedParameterQuery(query)
-  }
+		namedparameter.NewQuery(query)
+	}
 }
 
 /*
@@ -44,13 +46,13 @@ func BenchmarkMultiParameterParsing(bench *testing.B) {
 */
 func BenchmarkNoReplacement(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = quux"
-  replacer := NewNamedParameterQuery(query)
+	query := "SELECT [foo] FROM bar WHERE [baz] = quux"
+	replacer := namedparameter.NewQuery(query)
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    replacer.GetParsedParameters()
-  }
+		replacer.GetParsedParameters()
+	}
 }
 
 /*
@@ -58,14 +60,14 @@ func BenchmarkNoReplacement(bench *testing.B) {
 */
 func BenchmarkSingleReplacement(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux"
-  replacer := NewNamedParameterQuery(query)
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux"
+	replacer := namedparameter.NewQuery(query)
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    replacer.SetValue("quux", bench.N)
-    replacer.GetParsedParameters()
-  }
+		replacer.SetValue("quux", bench.N)
+		replacer.GetParsedParameters()
+	}
 }
 
 /*
@@ -73,16 +75,16 @@ func BenchmarkSingleReplacement(bench *testing.B) {
 */
 func BenchmarkMultiOccurrenceReplacement(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
-            "AND [something] = :quux " +
-            "OR [otherStuff] NOT :quux"
-  replacer := NewNamedParameterQuery(query)
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
+		"AND [something] = :quux " +
+		"OR [otherStuff] NOT :quux"
+	replacer := namedparameter.NewQuery(query)
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    replacer.SetValue("quux", bench.N)
-    replacer.GetParsedParameters()
-  }
+		replacer.SetValue("quux", bench.N)
+		replacer.GetParsedParameters()
+	}
 }
 
 /*
@@ -90,34 +92,34 @@ func BenchmarkMultiOccurrenceReplacement(bench *testing.B) {
 */
 func BenchmarkMultiParameterReplacement(bench *testing.B) {
 
-  query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
-            "AND [something] = :quux2 " +
-            "OR [otherStuff] NOT :quux3 "
-  replacer := NewNamedParameterQuery(query)
+	query := "SELECT [foo] FROM bar WHERE [baz] = :quux " +
+		"AND [something] = :quux2 " +
+		"OR [otherStuff] NOT :quux3 "
+	replacer := namedparameter.NewQuery(query)
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    replacer.SetValue("quux", bench.N)
-    replacer.SetValue("quux2", bench.N)
-    replacer.SetValue("quux3", bench.N)
-    replacer.GetParsedParameters()
-  }
+		replacer.SetValue("quux", bench.N)
+		replacer.SetValue("quux2", bench.N)
+		replacer.SetValue("quux3", bench.N)
+		replacer.GetParsedParameters()
+	}
 }
 
 func Benchmark16ParameterReplacement(bench *testing.B) {
-    benchmarkMultiParameter(bench, 16)
+	benchmarkMultiParameter(bench, 16)
 }
 
 func Benchmark32ParameterReplacement(bench *testing.B) {
-    benchmarkMultiParameter(bench, 32)
+	benchmarkMultiParameter(bench, 32)
 }
 
 func Benchmark64ParameterReplacement(bench *testing.B) {
-    benchmarkMultiParameter(bench, 64)
+	benchmarkMultiParameter(bench, 64)
 }
 
 func Benchmark128ParameterReplacement(bench *testing.B) {
-    benchmarkMultiParameter(bench, 128)
+	benchmarkMultiParameter(bench, 128)
 }
 
 /*
@@ -125,26 +127,26 @@ func Benchmark128ParameterReplacement(bench *testing.B) {
 */
 func benchmarkMultiParameter(bench *testing.B, parameterCount int) {
 
-  var queryBuffer bytes.Buffer
-  var parameterName string
+	var queryBuffer bytes.Buffer
+	var parameterName string
 
-  queryBuffer.WriteString("SELECT [foo] FROM bar WHERE [baz] = :quux ")
-  queryLine := "AND [something] = :quux%d "
+	queryBuffer.WriteString("SELECT [foo] FROM bar WHERE [baz] = :quux ")
+	queryLine := "AND [something] = :quux%d "
 
-  for i := 0; i < parameterCount; i++ {
+	for i := 0; i < parameterCount; i++ {
 
-    queryBuffer.WriteString(fmt.Sprintf(queryLine, i))
-  }
+		queryBuffer.WriteString(fmt.Sprintf(queryLine, i))
+	}
 
-  replacer := NewNamedParameterQuery(queryBuffer.String())
+	replacer := namedparameter.NewQuery(queryBuffer.String())
 
-  for i := 0; i < bench.N; i++ {
+	for i := 0; i < bench.N; i++ {
 
-    for n := 0; n < parameterCount; n++ {
-      parameterName = fmt.Sprintf("quux%d", n)
-      replacer.SetValue(parameterName, bench.N)
-    }
+		for n := 0; n < parameterCount; n++ {
+			parameterName = fmt.Sprintf("quux%d", n)
+			replacer.SetValue(parameterName, bench.N)
+		}
 
-    replacer.GetParsedParameters()
-  }
+		replacer.GetParsedParameters()
+	}
 }
