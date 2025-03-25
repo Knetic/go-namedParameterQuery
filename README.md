@@ -1,9 +1,9 @@
 NamedParameterQuery
 ====
 
-[![Build Status](https://travis-ci.org/Knetic/go-namedParameterQuery.svg?branch=master)](https://travis-ci.org/Knetic/go-namedParameterQuery)
 [![Godoc](https://godoc.org/github.com/Knetic/go-namedParameterQuery?status.png)](https://godoc.org/github.com/Knetic/go-namedParameterQuery)
 
+# ARCHIVED - no longer maintained. See [ARCHIVED.md](./ARCHIVED.md) for navel-gazing.
 
 Provides support for named parameters in SQL queries used by Go / golang programs and libraries.
 
@@ -137,11 +137,6 @@ When defining your struct, you don't *need* to add the "sqlParameterName" tags.
 But if your query uses lowercase variable names (as mine did), your struct
 will need to have exportable field names (as above) you can translate between the two
 with a tag.
-
-Activity
---
-
-If this repository hasn't been updated in a while, it's probably because I don't have any outstanding issues to work on - it's not because I've abandoned the project. If you have questions, issues, or patches; I'm completely open to pull requests, issues opened on github, or emails from out of the blue.
 
 License
 --
